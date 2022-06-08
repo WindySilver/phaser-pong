@@ -14,6 +14,10 @@
 
 <script type="text/javascript">
 
+var playerScore = 0;
+var opponentScore = 0;
+var scoreText;
+
 var config = {
     type: Phaser.AUTO,
     width: 1920,
@@ -39,28 +43,44 @@ function preload ()
     this.load.image('sky', 'assets/backgroundplaceholder.png');
     this.load.image('platform', 'assets/platformplaceholder.png');
     this.load.image('side', 'assets/sideplaceholder.png');
-    this.load.image('player', 
-        'assets/playerplaceholder.png');
+    this.load.image('player', 'assets/playerplaceholder.png');
+    this.load.image('ball', 'assets/ballplaceholder.png');
 }
 
 function create ()
 {
     this.add.image(960, 540, 'sky');
-    platforms = this.physics.add.staticGroup();
+    boundaries = this.physics.add.staticGroup();
+    boundaries.create(960, 30, 'platform').setScale(2).refreshBody();
+    boundaries.create(30, 540, 'side').setScale(2).refreshBody();
+    boundaries.create(1890, 540, 'side').setScale(2).refreshBody();
 
-    platforms.create(960, 1050, 'platform').setScale(2).refreshBody();
-    platforms.create(960, 30, 'platform').setScale(2).refreshBody();
+    playerArea = this.physics.add.staticGroup();
+    playerArea.create(480, 1050, 'platform');
 
-    platforms.create(30, 540, 'side').setScale(2).refreshBody();
-    platforms.create(1890, 540, 'side').setScale(2).refreshBody();
+    opponentArea = this.physics.add.staticGroup();
+    opponentArea.create(1440, 1050, 'platform');
 
     player = this.physics.add.sprite(300, 990, 'player');
 
     player.setCollideWorldBounds(true);
 
-    this.physics.add.collider(player, platforms);
+    this.physics.add.collider(player, boundaries);
+    this.physics.add.collider(player, playerArea);
+    this.physics.add.collider(player, opponentArea);
     
     cursors = this.input.keyboard.createCursorKeys();
+
+    ball = this.physics.add.sprite(700, 800, 'ball');
+    ball.setBounce(1);
+    ball.setVelocityX(25);
+
+    this.physics.add.collider(boundaries, ball);
+    this.physics.add.collider(player, ball, pushBall);
+    this.physics.add.overlap(ball, playerArea, getPointOpponent);
+    this.physics.add.overlap(ball, opponentArea, getPointPlayer);
+
+    scoreText = this.add.text(16, 16, 'Player: 0\nOpponent: 0', { fontSize: '32px', fill: '#fff' });
 
 }
 
@@ -80,6 +100,31 @@ function update ()
     }
 }
 
+/**
+ * Gives the point to the player when the opponent misses the ball.
+ */
+
+function getPointPlayer(){
+    pushBall();
+    playerScore += 1;
+    scoreText.setText('Player: ' + playerScore + '\nOpponent: ' + opponentScore);
+}
+
+/**
+ * Gives the point to the opponent when the player misses the ball.
+ */
+function getPointOpponent(){
+    pushBall();
+    opponentScore += 1;
+    scoreText.setText('Player: ' + playerScore + '\nOpponent: ' + opponentScore);
+}
+
+/**
+ * Pushes the ball up when it collides with the ground or the paddles.
+ */
+function pushBall(){
+    ball.setVelocityY(-330);
+}
 
 
 </script>
