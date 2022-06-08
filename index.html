@@ -37,38 +37,60 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
+var playerSpeed = 250
+var ballSpeedY = -666
+var ballSpeedX = 50
 
+/**
+ * Preloads the needed assets.
+ */
 function preload ()
 {
     this.load.image('sky', 'assets/backgroundplaceholder.png');
     this.load.image('platform', 'assets/platformplaceholder.png');
     this.load.image('side', 'assets/sideplaceholder.png');
-    this.load.image('player', 'assets/playerplaceholder.png');
+    this.load.image('player', 'assets/player.png');
+    this.load.image('opponent', 'assets/opponent.png');
+    this.load.image('playerArea', 'assets/playerArea.png');
+    this.load.image('opponentArea', 'assets/opponentArea.png');
     this.load.image('ball', 'assets/ballplaceholder.png');
 }
 
+/**
+ * Creates the necessary objects.
+ */
 function create ()
 {
     this.add.image(960, 540, 'sky');
+
+    playerArea = this.physics.add.staticGroup();
+    playerArea.create(480, 1050, 'playerArea');
+
+    opponentArea = this.physics.add.staticGroup();
+    opponentArea.create(1440, 1050, 'opponentArea');
+
     boundaries = this.physics.add.staticGroup();
-    boundaries.create(960, 30, 'platform').setScale(2).refreshBody();
+    boundaries.create(960, 5, 'platform').setScale(2).refreshBody();
+    boundaries.create(960, 1075, 'platform').setScale(2).refreshBody();
     boundaries.create(30, 540, 'side').setScale(2).refreshBody();
     boundaries.create(1890, 540, 'side').setScale(2).refreshBody();
 
-    playerArea = this.physics.add.staticGroup();
-    playerArea.create(480, 1050, 'platform');
-
-    opponentArea = this.physics.add.staticGroup();
-    opponentArea.create(1440, 1050, 'platform');
-
-    player = this.physics.add.sprite(300, 990, 'player');
-
+    player = this.physics.add.sprite(300, 1000, 'player');
     player.setCollideWorldBounds(true);
+
+    opponent = this.physics.add.sprite(1300, 1000, 'opponent');
+    opponent.setCollideWorldBounds(true);
 
     this.physics.add.collider(player, boundaries);
     this.physics.add.collider(player, playerArea);
     this.physics.add.collider(player, opponentArea);
     
+    this.physics.add.collider(opponent, boundaries);
+    this.physics.add.collider(opponent, playerArea);
+    this.physics.add.collider(opponent, opponentArea);
+
+    this.physics.add.collider(opponent, player);
+
     cursors = this.input.keyboard.createCursorKeys();
 
     ball = this.physics.add.sprite(700, 800, 'ball');
@@ -76,7 +98,8 @@ function create ()
     ball.setVelocityX(25);
 
     this.physics.add.collider(boundaries, ball);
-    this.physics.add.collider(player, ball, pushBall);
+    this.physics.add.overlap(player, ball, pushBall);
+    this.physics.add.overlap(opponent, ball, pushBall);
     this.physics.add.overlap(ball, playerArea, getPointOpponent);
     this.physics.add.overlap(ball, opponentArea, getPointPlayer);
 
@@ -84,19 +107,23 @@ function create ()
 
 }
 
+/**
+ * Handles things that need to be handled at each frame, such as inputs.
+ */
 function update ()
 {
     if (cursors.left.isDown)
     {
-        player.setVelocityX(-160);
+        player.setVelocityX(-playerSpeed);
     }
     else if (cursors.right.isDown)
     {
-        player.setVelocityX(160);
+        player.setVelocityX(playerSpeed);
     }
     else
     {
         player.setVelocityX(0);
+        opponent.setVelocityX(0);
     }
 }
 
@@ -123,7 +150,13 @@ function getPointOpponent(){
  * Pushes the ball up when it collides with the ground or the paddles.
  */
 function pushBall(){
-    ball.setVelocityY(-330);
+    if(ball.body.velocity.x < 0){
+        ball.setVelocityX(-ballSpeedX);
+    }
+    else{
+        ball.setVelocityX(ballSpeedX);
+    }
+    ball.setVelocityY(ballSpeedY);
 }
 
 
