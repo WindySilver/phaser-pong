@@ -1,0 +1,88 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Phaser Pong clone</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var config = {
+    type: Phaser.AUTO,
+    width: 1920,
+    height: 1080,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+var game = new Phaser.Game(config);
+
+function preload ()
+{
+    this.load.image('sky', 'assets/backgroundplaceholder.png');
+    this.load.image('platform', 'assets/platformplaceholder.png');
+    this.load.image('side', 'assets/sideplaceholder.png');
+    this.load.image('player', 
+        'assets/playerplaceholder.png');
+}
+
+function create ()
+{
+    this.add.image(960, 540, 'sky');
+    platforms = this.physics.add.staticGroup();
+
+    platforms.create(960, 1050, 'platform').setScale(2).refreshBody();
+    platforms.create(960, 30, 'platform').setScale(2).refreshBody();
+
+    platforms.create(30, 540, 'side').setScale(2).refreshBody();
+    platforms.create(1890, 540, 'side').setScale(2).refreshBody();
+
+    player = this.physics.add.sprite(300, 990, 'player');
+
+    player.setCollideWorldBounds(true);
+
+    this.physics.add.collider(player, platforms);
+    
+    cursors = this.input.keyboard.createCursorKeys();
+
+}
+
+function update ()
+{
+    if (cursors.left.isDown)
+    {
+        player.setVelocityX(-160);
+    }
+    else if (cursors.right.isDown)
+    {
+        player.setVelocityX(160);
+    }
+    else
+    {
+        player.setVelocityX(0);
+    }
+}
+
+
+
+</script>
+
+</body>
+</html>
