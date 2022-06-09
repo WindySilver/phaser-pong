@@ -39,7 +39,7 @@ var config = {
 var game = new Phaser.Game(config);
 var playerSpeed = 250
 var ballSpeedY = -666
-var ballSpeedX = 50
+var ballSpeedX = 100
 
 /**
  * Preloads the needed assets.
@@ -93,7 +93,7 @@ function create ()
 
     cursors = this.input.keyboard.createCursorKeys();
 
-    ball = this.physics.add.sprite(700, 800, 'ball');
+    ball = this.physics.add.sprite(700, 500, 'ball');
     ball.setBounce(1);
     ball.setVelocityX(25);
 
@@ -123,7 +123,17 @@ function update ()
     else
     {
         player.setVelocityX(0);
-        opponent.setVelocityX(0);
+    }
+    if (ball.body.position.x > 960){
+        if ((ball.body.velocity.x < 0 && opponent.body.position.x < ball.body.position.x)||((ball.body.velocity.x > 0 && opponent.body.position.x < ball.body.position.x))){
+            opponent.setVelocityX(playerSpeed);
+        }
+        else if ((ball.body.velocity.x > 0 && opponent.body.position.x > ball.body.position.x)||(ball.body.velocity.x < 0 && opponent.body.position.x > ball.body.position.x)){
+            opponent.setVelocityX(-playerSpeed);
+        }
+        else {
+            opponent.setVelocityX(0);
+        }
     }
 }
 
