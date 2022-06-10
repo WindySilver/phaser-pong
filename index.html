@@ -14,10 +14,6 @@
 
 <script type="text/javascript">
 
-var playerScore = 0;
-var opponentScore = 0;
-var scoreText;
-
 var config = {
     type: Phaser.AUTO,
     width: 1920,
@@ -36,15 +32,21 @@ var config = {
     }
 };
 
+
 var game = new Phaser.Game(config);
-var playerSpeed = 200
-var ballSpeedY = -666
-var ballSpeedX = 250
+var scoreText;
+var playerScore = 0;
+var opponentScore = 0;
+
+var playerSpeed = 200; // The speed of the paddles
+var ballSpeedY = -666; // The height the ball will bounce to
+var ballSpeedX = 250; // The ball's sideways direction
+
 
 /**
  * Preloads the needed assets.
  */
-function preload ()
+function preload()
 {
     this.load.image('sky', 'assets/backgroundplaceholder.png');
     this.load.image('platform', 'assets/platformplaceholder.png');
@@ -56,11 +58,13 @@ function preload ()
     this.load.image('ball', 'assets/ballplaceholder.png');
 }
 
+
 /**
  * Creates the necessary objects.
  */
-function create ()
+function create()
 {
+    // Create the level
     this.add.image(960, 540, 'sky');
 
     playerArea = this.physics.add.staticGroup();
@@ -75,6 +79,7 @@ function create ()
     boundaries.create(30, 540, 'side').setScale(2).refreshBody();
     boundaries.create(1890, 540, 'side').setScale(2).refreshBody();
 
+    // Create the player and opponent and add necessary colliders for them
     player = this.physics.add.sprite(300, 1000, 'player');
     player.setCollideWorldBounds(true);
 
@@ -91,9 +96,11 @@ function create ()
 
     this.physics.add.collider(opponent, player);
 
+    // Add input for keyboard
     cursors = this.input.keyboard.createCursorKeys();
 
-    ball = this.physics.add.sprite(700, 500, 'ball');
+    // Add the ball and the colliders it needs
+    ball = this.physics.add.sprite(300, 500, 'ball');
     ball.setBounce(1);
     ball.setVelocityX(25);
 
@@ -103,15 +110,17 @@ function create ()
     this.physics.add.overlap(ball, playerArea, getPointOpponent);
     this.physics.add.overlap(ball, opponentArea, getPointPlayer);
 
+    // Initialize the text for displaying the scores
     scoreText = this.add.text(16, 16, 'Player: 0\nOpponent: 0', { fontSize: '32px', fill: '#fff' });
-
 }
+
 
 /**
  * Handles things that need to be handled at each frame, such as inputs.
  */
-function update ()
+function update()
 {
+    // Handle player input
     if (cursors.left.isDown)
     {
         player.setVelocityX(-playerSpeed);
@@ -123,27 +132,37 @@ function update ()
     else
     {
         player.setVelocityX(0);
-        opponent.setVelocityX(0);
     }
-    if (ball.body.position.x > 960){
-        if ((ball.body.velocity.x < 0 && opponent.body.position.x < ball.body.position.x)||((ball.body.velocity.x > 0 && opponent.body.position.x < ball.body.position.x))){
+
+    // Handle opponent's AI
+    if (ball.body.position.x > 960)
+    {
+        if ((ball.body.velocity.x < 0 && opponent.body.position.x < ball.body.position.x)||((ball.body.velocity.x > 0 && opponent.body.position.x < ball.body.position.x)))
+        {
             opponent.setVelocityX(playerSpeed);
         }
-        else if ((ball.body.velocity.x > 0 && opponent.body.position.x > ball.body.position.x)||(ball.body.velocity.x < 0 && opponent.body.position.x > ball.body.position.x)){
+        else if ((ball.body.velocity.x > 0 && opponent.body.position.x > ball.body.position.x)||(ball.body.velocity.x < 0 && opponent.body.position.x > ball.body.position.x))
+        {
             opponent.setVelocityX(-playerSpeed);
         }
     }
+    else
+    {
+        // Keep the opponent from sliding all over the place
+        opponent.setVelocityX(0);
+    }
 }
+
 
 /**
  * Gives the point to the player when the opponent misses the ball.
  */
-
 function getPointPlayer(){
     pushBall();
     playerScore += 1;
     scoreText.setText('Player: ' + playerScore + '\nOpponent: ' + opponentScore);
 }
+
 
 /**
  * Gives the point to the opponent when the player misses the ball.
@@ -154,8 +173,9 @@ function getPointOpponent(){
     scoreText.setText('Player: ' + playerScore + '\nOpponent: ' + opponentScore);
 }
 
+
 /**
- * Pushes the ball up when it collides with the ground or the paddles.
+ * Pushes the ball up and sideways when it collides with the ground or the paddles.
  */
 function pushBall(){
     if(ball.body.velocity.x < 0){
@@ -167,8 +187,6 @@ function pushBall(){
     ball.setVelocityY(ballSpeedY);
 }
 
-
 </script>
-
 </body>
 </html>
